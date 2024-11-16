@@ -1,6 +1,7 @@
 import { StatusBar } from "expo-status-bar";
-import { StyleSheet, Text, View } from "react-native";
+import { StyleSheet, Text, View, FlatList } from "react-native";
 import { SQLiteProvider, useSQLiteContext } from "expo-sqlite";
+import { useState, useEffect } from "react";
 
 // Initialize the database
 async function initialiseDatabase(db) {
@@ -16,62 +17,96 @@ async function initialiseDatabase(db) {
       );
     `);
     console.log("Database initialised");
-
-    // Insert dummy data
-    await insertDummyData(db);
-
-    // Print out the data
-    await fetchAndLogData(db);
   } catch (error) {
     console.log("Error while initializing the database:", error);
   }
 }
 
-// Function to insert dummy data
-async function insertDummyData(db) {
-  try {
-    await db.execAsync(`
-      INSERT INTO students (firstname, lastname, age, email)
-      VALUES 
-        ('John', 'Doe', 20, 'john.doe@example.com'),
-        ('Jane', 'Smith', 22, 'jane.smith@example.com'),
-        ('Alice', 'Johnson', 19, 'alice.johnson@example.com');
-    `);
-    console.log("Dummy data inserted successfully");
-  } catch (error) {
-    console.log("Error while inserting dummy data:", error);
-  }
-}
-
-// Function to fetch and log the data
-async function fetchAndLogData(db) {
-  try {
-    const rows = await db.getAllAsync("SELECT * FROM students;");
-    console.log("Students Table Data:");
-    rows.forEach((row) => {
-      console.log(`ID: ${row.id}, Name: ${row.firstname} ${row.lastname}, Age: ${row.age}, Email: ${row.email}`);
-    });
-  } catch (error) {
-    console.log("Error while fetching data:", error);
-  }
-}
-
 export default function App() {
   return (
-    <SQLiteProvider databaseName="example.db" onInit={initialiseDatabase}>
+    <SQLiteProvider databaseName="example2.db" onInit={initialiseDatabase}>
       <View style={styles.container}>
-        <Text>Open up App.js to start working on your app!</Text>
+        <Text style={styles.title}>List of student</Text>
+        <Content />
         <StatusBar style="auto" />
       </View>
     </SQLiteProvider>
   );
 }
 
+const Content = () => {
+  const db = useSQLiteContext();
+  const [students, setStudents] = useState([]);
+
+  // Function to get all the students
+  const getStudents = async () => {
+    try {
+      const allRows = await db.getAllAsync('SELECT * FROM students');
+      setStudents(allRows);
+    } catch (error) {
+      console.log("Error while loading students: ", error);
+    }
+  };
+
+  // Function to add a student
+  const addStudent = async (newStudent) => {
+    try {
+      const statement = await db.prepareAsync(
+        'INSERT INTO students (firstname, lastname, age, email) VALUES (?, ?, ?, ?)'
+      );
+      await statement.executeAsync([
+        newStudent.firstname,
+        newStudent.lastname,
+        newStudent.age,
+        newStudent.email,
+      ]);
+      await getStudents();
+    } catch (error) {
+      console.log("Error while adding student: ", error);
+    }
+  };
+
+  // Get all the students at the first render of the app
+  useEffect(() => {
+    addStudent({
+      firstname: 'Lucas',
+      lastname: 'Smith',
+      age: 22,
+      email: 'lucas.smith@ex.com',
+    });
+    getStudents();
+  }, []);
+
+  return (
+    <View>
+      {students.length === 0 ? (
+        <Text>No students to load!</Text>
+      ) : (
+        <FlatList
+          data={students}
+          renderItem={({ item }) => (
+            <Text>
+              {item.id} - {item.lastname}
+            </Text>
+          )}
+          keyExtractor={(item) => item.id.toString()}
+        />
+      )}
+    </View>
+  );
+};
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#ff2",
+    backgroundColor: "#fff",
     alignItems: "center",
     justifyContent: "center",
+  },
+  title: {
+    fontSize: 24,
+    fontWeight: "bold",
+    marginTop: 60,
+    marginBottom: 30,
   },
 });
