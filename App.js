@@ -1,5 +1,5 @@
 import { StatusBar } from "expo-status-bar";
-import { StyleSheet, Text, View, FlatList } from "react-native";
+import { StyleSheet, Text, View, FlatList, Pressable } from "react-native";
 import { SQLiteProvider, useSQLiteContext } from "expo-sqlite";
 import { useState, useEffect } from "react";
 
@@ -21,6 +21,24 @@ async function initialiseDatabase(db) {
     console.log("Error while initializing the database:", error);
   }
 }
+
+//StudentButton component
+const StudentButton = ({ student }) => {
+  return (
+    <View>
+      <Pressable style={styles.studentButton}>
+        <Text style={styles.studentText}>{student.id} - {student.lastname}</Text>
+      </Pressable>
+
+      <View style={styles.studentContent}>
+        <Text>Fist Name : {student.firstname}</Text>
+        <Text>Last Name : {student.lastname}</Text>
+        <Text>Age : {student.age}</Text>
+        <Text>Email : {student.email}</Text>
+      </View>
+    </View>
+  )
+};
 
 export default function App() {
   return (
@@ -68,12 +86,12 @@ const Content = () => {
 
   const deleteAllStudent = async () => {
     try {
-      await db.runAsync('DELETE FROM students');
-      await getStudents();      
+      await db.runAsync("DELETE FROM students");
+      await getStudents();
     } catch (error) {
-      console.log('Error while deleting all the student : ', error);
+      console.log("Error while deleting all the student : ", error);
     }
-  }
+  };
 
   // Get all the students at the first render of the app
   useEffect(() => {
@@ -88,16 +106,14 @@ const Content = () => {
   }, []);
 
   return (
-    <View>
+    <View style={styles.contentContainer}>
       {students.length === 0 ? (
         <Text>No students to load!</Text>
       ) : (
         <FlatList
           data={students}
           renderItem={({ item }) => (
-            <Text>
-              {item.id} - {item.lastname}
-            </Text>
+            <StudentButton student={item} />
           )}
           keyExtractor={(item) => item.id.toString()}
         />
@@ -119,4 +135,21 @@ const styles = StyleSheet.create({
     marginTop: 60,
     marginBottom: 20,
   },
+  contentContainer: {
+    flex: 1,
+    width: '90%',
+  },
+  studentButton: {
+    backgroundColor: 'lightblue',
+    padding: 5,
+    marginVertical: 5,
+  },
+  studentText: {
+    fontSize: 20,
+    fontWeight: 'bolder'
+  },
+  studentContent: {
+    backgroundColor: '#cdcdcd',
+    padding: 10,
+  }
 });
