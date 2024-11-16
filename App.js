@@ -41,7 +41,7 @@ const Content = () => {
   // Function to get all the students
   const getStudents = async () => {
     try {
-      const allRows = await db.getAllAsync('SELECT * FROM students');
+      const allRows = await db.getAllAsync("SELECT * FROM students");
       setStudents(allRows);
     } catch (error) {
       console.log("Error while loading students: ", error);
@@ -52,7 +52,7 @@ const Content = () => {
   const addStudent = async (newStudent) => {
     try {
       const statement = await db.prepareAsync(
-        'INSERT INTO students (firstname, lastname, age, email) VALUES (?, ?, ?, ?)'
+        "INSERT INTO students (firstname, lastname, age, email) VALUES (?, ?, ?, ?)"
       );
       await statement.executeAsync([
         newStudent.firstname,
@@ -66,14 +66,24 @@ const Content = () => {
     }
   };
 
+  const deleteAllStudent = async () => {
+    try {
+      await db.runAsync('DELETE FROM students');
+      await getStudents();      
+    } catch (error) {
+      console.log('Error while deleting all the student : ', error);
+    }
+  }
+
   // Get all the students at the first render of the app
   useEffect(() => {
     addStudent({
-      firstname: 'Lucas',
-      lastname: 'Smith',
+      firstname: "Lucas",
+      lastname: "Smith",
       age: 22,
-      email: 'lucas.smith@ex.com',
+      email: "lucas.smith@ex.com",
     });
+    //deleteAllStudent();
     getStudents();
   }, []);
 
@@ -107,6 +117,6 @@ const styles = StyleSheet.create({
     fontSize: 24,
     fontWeight: "bold",
     marginTop: 60,
-    marginBottom: 30,
+    marginBottom: 20,
   },
 });
