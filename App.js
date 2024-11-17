@@ -59,7 +59,7 @@ const StudentButton = ({ student }) => {
   );
 };
 
-const StudentForm = ({addStudent}) => {
+const StudentForm = ({ addStudent, setShowForm }) => {
   const [student, setStudent] = useState({
     id: 0,
     firstname: "",
@@ -68,12 +68,17 @@ const StudentForm = ({addStudent}) => {
     email: "",
   });
   const handleSave = () => {
-    if(student.firstname.length === 0 || student.lastname.length === 0 || student.age.length === 0 || student.email.length === 0) {
-      Alert.alert('Attention', 'Please enter all the data');
+    if (
+      student.firstname.length === 0 ||
+      student.lastname.length === 0 ||
+      student.age.length === 0 ||
+      student.email.length === 0
+    ) {
+      Alert.alert("Attention", "Please enter all the data");
     } else {
       addStudent(student);
     }
-  }
+  };
 
   return (
     <View>
@@ -103,11 +108,11 @@ const StudentForm = ({addStudent}) => {
         onChangeText={(text) => setStudent({ ...student, email: text })}
         keyboardType="email-address"
       />
-      <Pressable
-        onPress={handleSave}
-        style={styles.saveButton}
-      >
-        <Text style={styles.saveButtonText}>Save</Text>
+      <Pressable onPress={handleSave} style={styles.saveButton}>
+        <Text style={styles.buttonText}>Save</Text>
+      </Pressable>
+      <Pressable onPress={() => setShowForm(false)} style={styles.cancelButton}>
+        <Text style={styles.buttonText}>Cancel</Text>
       </Pressable>
     </View>
   );
@@ -128,6 +133,7 @@ export default function App() {
 const Content = () => {
   const db = useSQLiteContext();
   const [students, setStudents] = useState([]);
+  const [showForm, setShowForm] = useState(false);
 
   // Function to get all the students
   const getStudents = async () => {
@@ -181,13 +187,13 @@ const Content = () => {
 
   // Get all the students at the first render of the app
   useEffect(() => {
-    addStudent({
+    /* addStudent({
       firstname: "Lucas",
       lastname: "Smith",
       age: 22,
       email: "lucas.smith@ex.com",
-    });
-    //deleteAllStudent();
+    }); */
+    /* deleteAllStudent(); */
     getStudents();
   }, []);
 
@@ -202,8 +208,17 @@ const Content = () => {
           keyExtractor={(item) => item.id.toString()}
         />
       )}
-      <StudentForm addStudent={addStudent} />
+      {showForm && (
+        <StudentForm addStudent={addStudent} setShowForm={setShowForm} />
+      )}
       <View>
+        <AntDesign
+          name="pluscircleo"
+          size={30}
+          color="blue"
+          onPress={() => setShowForm(true)}
+          style={styles.icon}
+        />
         <AntDesign
           name="deleteusergroup"
           size={30}
@@ -251,17 +266,22 @@ const styles = StyleSheet.create({
   },
   input: {
     borderWidth: 1,
-    borderColor: '#ccc',
+    borderColor: "#ccc",
     padding: 8,
     marginVertical: 3,
   },
   saveButton: {
-    backgroundColor: 'blue',
+    backgroundColor: "blue",
     padding: 10,
     marginVertical: 5,
   },
-  saveButtonText: {
-    color: 'white',
-    textAlign: 'center'
-  }
+  buttonText: {
+    color: "white",
+    textAlign: "center",
+  },
+  cancelButton: {
+    backgroundColor: "grey",
+    padding: 10,
+    marginVertical: 5,
+  },
 });
