@@ -32,8 +32,15 @@ async function initialiseDatabase(db) {
 }
 
 //StudentButton component
-const StudentButton = ({ student, deleteStudent }) => {
+const StudentButton = ({ student, deleteStudent, updateStudent }) => {
   const [selectedStudent, setSelectedStudent] = useState(null);
+  const [isEditing, setIsEditing] = useState(false);
+  const [editedStudent, setIsEditedStudent] = useState({
+    firstname: student.firstname,
+    lastname: student.lastname,
+    age: student.age,
+    email: student.email,
+  });
 
   // Function to confirm to delete a student
   const handleDelete = () => {
@@ -46,6 +53,17 @@ const StudentButton = ({ student, deleteStudent }) => {
       ],
       { cancelable: true }
     );
+  };
+
+  const handleEdit = () => {
+    updateStudent(
+      student.id,
+      editedStudent.firstname,
+      editedStudent.lastname,
+      editedStudent.age,
+      editedStudent.email
+    );
+    setIsEditing(false);
   };
 
   return (
@@ -65,7 +83,7 @@ const StudentButton = ({ student, deleteStudent }) => {
               name="edit"
               size={18}
               color="blue"
-              // onPress={}
+              onPress={() => setIsEditing(true)}
               style={styles.icon}
             />
             <AntDesign
@@ -78,7 +96,7 @@ const StudentButton = ({ student, deleteStudent }) => {
           </View>
         )}
       </Pressable>
-      {selectedStudent === student.id && (
+      {selectedStudent === student.id && !isEditing && (
         <View style={styles.studentContent}>
           <Text>Fist Name : {student.firstname}</Text>
           <Text>Last Name : {student.lastname}</Text>
@@ -86,31 +104,19 @@ const StudentButton = ({ student, deleteStudent }) => {
           <Text>Email : {student.email}</Text>
         </View>
       )}
+      {selectedStudent === student.id && isEditing && (
+        <StudentForm
+          student={editedStudent}
+          setStudent={setIsEditedStudent}
+          onSave={handleEdit}
+          setShowForm={setIsEditing}
+        />
+      )}
     </View>
   );
 };
 
-const StudentForm = ({ addStudent, setShowForm }) => {
-  const [student, setStudent] = useState({
-    id: 0,
-    firstname: "",
-    lastname: "",
-    age: 0,
-    email: "",
-  });
-  const handleSave = () => {
-    if (
-      student.firstname.length === 0 ||
-      student.lastname.length === 0 ||
-      student.age.length === 0 ||
-      student.email.length === 0
-    ) {
-      Alert.alert("Attention", "Please enter all the data");
-    } else {
-      addStudent(student);
-    }
-  };
-
+const StudentForm = ({ student, setStudent, onSave, setShowForm }) => {
   return (
     <View>
       <TextInput
@@ -139,7 +145,7 @@ const StudentForm = ({ addStudent, setShowForm }) => {
         onChangeText={(text) => setStudent({ ...student, email: text })}
         keyboardType="email-address"
       />
-      <Pressable onPress={handleSave} style={styles.saveButton}>
+      <Pressable onPress={onSave} style={styles.saveButton}>
         <Text style={styles.buttonText}>Save</Text>
       </Pressable>
       <Pressable onPress={() => setShowForm(false)} style={styles.cancelButton}>
@@ -165,6 +171,25 @@ const Content = () => {
   const db = useSQLiteContext();
   const [students, setStudents] = useState([]);
   const [showForm, setShowForm] = useState(false);
+  const [student, setStudent] = useState({
+    id: 0,
+    firstname: "",
+    lastname: "",
+    age: 0,
+    email: "",
+  });
+  const handleSave = () => {
+    if (
+      student.firstname.length === 0 ||
+      student.lastname.length === 0 ||
+      student.age.length === 0 ||
+      student.email.length === 0
+    ) {
+      Alert.alert("Attention", "Please enter all the data");
+    } else {
+      addStudent(student);
+    }
+  };
 
   // Function to get all the students
   const getStudents = async () => {
@@ -265,13 +290,22 @@ const Content = () => {
         <FlatList
           data={students}
           renderItem={({ item }) => (
-            <StudentButton student={item} deleteStudent={deleteStudent} />
+            <StudentButton
+              student={item}
+              deleteStudent={deleteStudent}
+              updateStudent={updateStudent}
+            />
           )}
           keyExtractor={(item) => item.id.toString()}
         />
       )}
       {showForm && (
-        <StudentForm addStudent={addStudent} setShowForm={setShowForm} />
+        <StudentForm
+          student={student}
+          setStudent={setStudent}
+          onSave={handleSave}
+          setShowForm={setShowForm}
+        />
       )}
       <View style={styles.iconsContent}>
         <AntDesign
