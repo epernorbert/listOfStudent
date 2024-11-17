@@ -46,6 +46,24 @@ const StudentButton = ({ student }) => {
         <Text style={styles.studentText}>
           {student.id} - {student.lastname}
         </Text>
+        {selectedStudent === student.id && (
+          <View style={styles.actions}>
+            <AntDesign
+              name="edit"
+              size={18}
+              color="blue"
+              // onPress={}
+              style={styles.icon}
+            />
+            <AntDesign
+              name="delete"
+              size={18}
+              color="red"
+              // onPress={}
+              style={styles.icon}
+            />
+          </View>
+        )}
       </Pressable>
       {selectedStudent === student.id && (
         <View style={styles.studentContent}>
@@ -185,6 +203,35 @@ const Content = () => {
     );
   };
 
+  // Function to update a student
+  const updateStudent = async (
+    studentId,
+    newFirstName,
+    newLastName,
+    newAge,
+    newEmail
+  ) => {
+    try {
+      await db.runAsync(
+        "UPDATE students SET firstName = ?, lastName = ?, age = ?, email = ? WHERE id = ?",
+        [newFirstName, newLastName, newAge, newEmail, studentId]
+      );
+      await getStudents();
+    } catch (error) {
+      console.log("Error while updating student:", error);
+    }
+  };
+
+  // Function to delete a student
+  const deleteStudent = async (id) => {
+    try {
+      await db.runAsync("DELETE FROM students WHERE id = ?", [id]);
+      await getStudents();
+    } catch (error) {
+      console.log("Error while deleting the student:", error);
+    }
+  };
+
   // Get all the students at the first render of the app
   useEffect(() => {
     /* addStudent({
@@ -211,7 +258,7 @@ const Content = () => {
       {showForm && (
         <StudentForm addStudent={addStudent} setShowForm={setShowForm} />
       )}
-      <View>
+      <View style={styles.iconsContent}>
         <AntDesign
           name="pluscircleo"
           size={30}
@@ -252,6 +299,8 @@ const styles = StyleSheet.create({
     backgroundColor: "lightblue",
     padding: 5,
     marginVertical: 5,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
   },
   studentText: {
     fontSize: 20,
@@ -284,4 +333,14 @@ const styles = StyleSheet.create({
     padding: 10,
     marginVertical: 5,
   },
+  iconsContent: {
+    flexDirection: "row",
+    justifyContent: "space-around",
+    marginVertical: 20,
+  },
+  actions: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    padding: 10,
+  }
 });
