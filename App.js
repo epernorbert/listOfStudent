@@ -24,20 +24,30 @@ async function initialiseDatabase(db) {
 
 //StudentButton component
 const StudentButton = ({ student }) => {
+  const [selectedStudent, setSelectedStudent] = useState(null);
+
   return (
     <View>
-      <Pressable style={styles.studentButton}>
-        <Text style={styles.studentText}>{student.id} - {student.lastname}</Text>
+      <Pressable
+        style={styles.studentButton}
+        onPress={() =>
+          setSelectedStudent(selectedStudent === student.id ? null : student.id)
+        }
+      >
+        <Text style={styles.studentText}>
+          {student.id} - {student.lastname}
+        </Text>
       </Pressable>
-
-      <View style={styles.studentContent}>
-        <Text>Fist Name : {student.firstname}</Text>
-        <Text>Last Name : {student.lastname}</Text>
-        <Text>Age : {student.age}</Text>
-        <Text>Email : {student.email}</Text>
-      </View>
+      {selectedStudent === student.id && (
+        <View style={styles.studentContent}>
+          <Text>Fist Name : {student.firstname}</Text>
+          <Text>Last Name : {student.lastname}</Text>
+          <Text>Age : {student.age}</Text>
+          <Text>Email : {student.email}</Text>
+        </View>
+      )}
     </View>
-  )
+  );
 };
 
 export default function App() {
@@ -112,9 +122,7 @@ const Content = () => {
       ) : (
         <FlatList
           data={students}
-          renderItem={({ item }) => (
-            <StudentButton student={item} />
-          )}
+          renderItem={({ item }) => <StudentButton student={item} />}
           keyExtractor={(item) => item.id.toString()}
         />
       )}
@@ -137,19 +145,19 @@ const styles = StyleSheet.create({
   },
   contentContainer: {
     flex: 1,
-    width: '90%',
+    width: "90%",
   },
   studentButton: {
-    backgroundColor: 'lightblue',
+    backgroundColor: "lightblue",
     padding: 5,
     marginVertical: 5,
   },
   studentText: {
     fontSize: 20,
-    fontWeight: 'bolder'
+    fontWeight: "bolder",
   },
   studentContent: {
-    backgroundColor: '#cdcdcd',
+    backgroundColor: "#cdcdcd",
     padding: 10,
-  }
+  },
 });
