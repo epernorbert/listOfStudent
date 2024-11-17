@@ -32,8 +32,21 @@ async function initialiseDatabase(db) {
 }
 
 //StudentButton component
-const StudentButton = ({ student }) => {
+const StudentButton = ({ student, deleteStudent }) => {
   const [selectedStudent, setSelectedStudent] = useState(null);
+
+  // Function to confirm to delete a student
+  const handleDelete = () => {
+    Alert.alert(
+      "Attention!",
+      "Are you sure you want to delete the student?",
+      [
+        { text: "No", onPress: () => {}, style: "cancel" },
+        { text: "Yes", onPress: () => deleteStudent(student.id) },
+      ],
+      { cancelable: true }
+    );
+  };
 
   return (
     <View>
@@ -59,7 +72,7 @@ const StudentButton = ({ student }) => {
               name="delete"
               size={18}
               color="red"
-              // onPress={}
+              onPress={handleDelete}
               style={styles.icon}
             />
           </View>
@@ -251,7 +264,9 @@ const Content = () => {
       ) : (
         <FlatList
           data={students}
-          renderItem={({ item }) => <StudentButton student={item} />}
+          renderItem={({ item }) => (
+            <StudentButton student={item} deleteStudent={deleteStudent} />
+          )}
           keyExtractor={(item) => item.id.toString()}
         />
       )}
@@ -299,8 +314,8 @@ const styles = StyleSheet.create({
     backgroundColor: "lightblue",
     padding: 5,
     marginVertical: 5,
-    flexDirection: 'row',
-    justifyContent: 'space-between',
+    flexDirection: "row",
+    justifyContent: "space-between",
   },
   studentText: {
     fontSize: 20,
@@ -339,8 +354,8 @@ const styles = StyleSheet.create({
     marginVertical: 20,
   },
   actions: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
+    flexDirection: "row",
+    justifyContent: "space-around",
     padding: 10,
-  }
+  },
 });
