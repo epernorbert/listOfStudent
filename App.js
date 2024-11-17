@@ -1,7 +1,8 @@
 import { StatusBar } from "expo-status-bar";
-import { StyleSheet, Text, View, FlatList, Pressable } from "react-native";
+import { StyleSheet, Text, View, FlatList, Pressable, Alert } from "react-native";
 import { SQLiteProvider, useSQLiteContext } from "expo-sqlite";
 import { useState, useEffect } from "react";
+import { AntDesign } from '@expo/vector-icons';
 
 // Initialize the database
 async function initialiseDatabase(db) {
@@ -103,6 +104,19 @@ const Content = () => {
     }
   };
 
+  // function to confirm deleting all student
+  const confirmDeleteAll = () => {
+    Alert.alert(
+      'Attention',
+      'Are you sure you want to delete all the students?',
+      [
+        { text: 'No', onPress: () => {}, styles: 'cancel' },
+        { text: 'Yes', onPress: deleteAllStudent },
+      ],
+      { cancelable: true }
+    )
+  }
+
   // Get all the students at the first render of the app
   useEffect(() => {
     addStudent({
@@ -126,6 +140,15 @@ const Content = () => {
           keyExtractor={(item) => item.id.toString()}
         />
       )}
+    <View>
+      <AntDesign
+        name="deleteusergroup"
+        size={30}
+        color='red'
+        onPress={confirmDeleteAll}
+        style={styles.icon}
+      />
+    </View>
     </View>
   );
 };
@@ -160,4 +183,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#cdcdcd",
     padding: 10,
   },
+  icon: {
+    marginHorizontal: 5,
+  }
 });
