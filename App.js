@@ -1,8 +1,16 @@
 import { StatusBar } from "expo-status-bar";
-import { StyleSheet, Text, View, FlatList, Pressable, Alert } from "react-native";
+import {
+  StyleSheet,
+  Text,
+  View,
+  FlatList,
+  Pressable,
+  Alert,
+  TextInput,
+} from "react-native";
 import { SQLiteProvider, useSQLiteContext } from "expo-sqlite";
 import { useState, useEffect } from "react";
-import { AntDesign } from '@expo/vector-icons';
+import { AntDesign } from "@expo/vector-icons";
 
 // Initialize the database
 async function initialiseDatabase(db) {
@@ -47,6 +55,60 @@ const StudentButton = ({ student }) => {
           <Text>Email : {student.email}</Text>
         </View>
       )}
+    </View>
+  );
+};
+
+const StudentForm = ({addStudent}) => {
+  const [student, setStudent] = useState({
+    id: 0,
+    firstname: "",
+    lastname: "",
+    age: 0,
+    email: "",
+  });
+  const handleSave = () => {
+    if(student.firstname.length === 0 || student.lastname.length === 0 || student.age.length === 0 || student.email.length === 0) {
+      Alert.alert('Attention', 'Please enter all the data');
+    } else {
+      addStudent(student);
+    }
+  }
+
+  return (
+    <View>
+      <TextInput
+        style={styles.input}
+        placeholder="First name"
+        value={student.firstname}
+        onChangeText={(text) => setStudent({ ...student, firstname: text })}
+      />
+      <TextInput
+        style={styles.input}
+        placeholder="Last name"
+        value={student.lastname}
+        onChangeText={(text) => setStudent({ ...student, lastname: text })}
+      />
+      <TextInput
+        style={styles.input}
+        placeholder="Age"
+        value={student.age}
+        onChangeText={(text) => setStudent({ ...student, age: text })}
+        keyboardType="numeric"
+      />
+      <TextInput
+        style={styles.input}
+        placeholder="Email"
+        value={student.email}
+        onChangeText={(text) => setStudent({ ...student, email: text })}
+        keyboardType="email-address"
+      />
+      <Pressable
+        onPress={handleSave}
+        style={styles.saveButton}
+      >
+        <Text style={styles.saveButtonText}>Save</Text>
+      </Pressable>
     </View>
   );
 };
@@ -107,15 +169,15 @@ const Content = () => {
   // function to confirm deleting all student
   const confirmDeleteAll = () => {
     Alert.alert(
-      'Attention',
-      'Are you sure you want to delete all the students?',
+      "Attention",
+      "Are you sure you want to delete all the students?",
       [
-        { text: 'No', onPress: () => {}, styles: 'cancel' },
-        { text: 'Yes', onPress: deleteAllStudent },
+        { text: "No", onPress: () => {}, styles: "cancel" },
+        { text: "Yes", onPress: deleteAllStudent },
       ],
       { cancelable: true }
-    )
-  }
+    );
+  };
 
   // Get all the students at the first render of the app
   useEffect(() => {
@@ -140,15 +202,16 @@ const Content = () => {
           keyExtractor={(item) => item.id.toString()}
         />
       )}
-    <View>
-      <AntDesign
-        name="deleteusergroup"
-        size={30}
-        color='red'
-        onPress={confirmDeleteAll}
-        style={styles.icon}
-      />
-    </View>
+      <StudentForm addStudent={addStudent} />
+      <View>
+        <AntDesign
+          name="deleteusergroup"
+          size={30}
+          color="red"
+          onPress={confirmDeleteAll}
+          style={styles.icon}
+        />
+      </View>
     </View>
   );
 };
@@ -185,5 +248,20 @@ const styles = StyleSheet.create({
   },
   icon: {
     marginHorizontal: 5,
+  },
+  input: {
+    borderWidth: 1,
+    borderColor: '#ccc',
+    padding: 8,
+    marginVertical: 3,
+  },
+  saveButton: {
+    backgroundColor: 'blue',
+    padding: 10,
+    marginVertical: 5,
+  },
+  saveButtonText: {
+    color: 'white',
+    textAlign: 'center'
   }
 });
