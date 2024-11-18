@@ -11,6 +11,7 @@ import {
 import { SQLiteProvider, useSQLiteContext } from "expo-sqlite";
 import { useState, useEffect } from "react";
 import { AntDesign } from "@expo/vector-icons";
+import { useDrizzleStudio } from "expo-drizzle-studio-plugin";
 
 // Initialize the database
 async function initialiseDatabase(db) {
@@ -157,7 +158,7 @@ const StudentForm = ({ student, setStudent, onSave, setShowForm }) => {
 
 export default function App() {
   return (
-    <SQLiteProvider databaseName="example2.db" onInit={initialiseDatabase}>
+    <SQLiteProvider databaseName="example.db" onInit={initialiseDatabase}>
       <View style={styles.container}>
         <Text style={styles.title}>List of student</Text>
         <Content />
@@ -169,6 +170,8 @@ export default function App() {
 
 const Content = () => {
   const db = useSQLiteContext();
+  useDrizzleStudio(db);
+
   const [students, setStudents] = useState([]);
   const [showForm, setShowForm] = useState(false);
   const [student, setStudent] = useState({
